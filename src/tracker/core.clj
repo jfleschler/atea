@@ -236,7 +236,8 @@
        (java.io.File/separator)
        file))
 
-(def default-cfg {:file (rel-to-home "tasks.txt")})
+(def default-cfg {:file (rel-to-home "tasks.txt")
+                  :use-daily-log false})
 
 (defn write-default-cfg []
   (spit (rel-to-home ".atea") (pr-str default-cfg)))
@@ -249,11 +250,15 @@
         (write-default-cfg)
         default-cfg))))
 
-(defn ttname [tname]
+(defn ttname [tname use-daily-log]
   (let [match (re-matches #"(.+)\..*" tname)]
-    (if match
-      (str (match 1) "-times-" (today) ".csv")
-      (str tname "-times" (today) ".csv"))))
+    (if use-daily-log
+      (if match
+        (str (match 1) "-times-" (today) ".csv")
+        (str tname "-times" (today) ".csv"))
+      (if match
+        (str (match 1) "-times.csv")
+        (str tname "-times.csv")))))
 
 (defn -main []
   (let [old-file (atom nil)
@@ -265,16 +270,17 @@
     (.setActionListener
       menu
       (action #(let [file (:file (load-cfg))
-                     tfile (ttname file)
+                     use-daily-log (:use-daily-log (load-cfg))
+                     tfile (ttname file use-daily-log)
                      tasks (load-tasks file)
                      ttasks (load-ttasks tfile)]
 
                  ; if file *name* changed, write out old one first
                  (when (and @old-file (not= @old-file file))
                    ; we presume this is gonna work since it worked last time :)
-                   (write-ttasks (ttname @old-file)
+                   (write-ttasks (ttname @old-file use-daily-log)
                                  (load-tasks @old-file)
-                                 (load-ttasks (ttname @old-file))
+                                 (load-ttasks (ttname @old-file use-daily-log))
                                  nil))
 
                  ; update menu
