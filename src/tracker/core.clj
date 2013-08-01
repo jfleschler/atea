@@ -26,7 +26,7 @@
   (.getTime (java.util.Date.)))
 
 (defn today []
-  (time-format/unparse (time-format/formatters :basic-date) (time/now)))
+  (time-format/unparse (time-format/formatters :basic-date) (time/from-time-zone (time/now) (time/default-time-zone))))
 
 (defn to-mins [msec]
   (quot msec 60000))
