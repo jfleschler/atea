@@ -1,5 +1,7 @@
 (ns tracker.core
   (:require [clojure.string :as string])
+  (:require [clj-time.core :as time])
+  (:require [clj-time.format :as time-format])
   (:import org.jdesktop.jdic.tray.internal.impl.MacSystemTrayService)
   (:import org.jdesktop.jdic.tray.internal.impl.MacTrayIconService)
   (:gen-class))
@@ -22,6 +24,9 @@
 
 (defn now []
   (.getTime (java.util.Date.)))
+
+(defn today []
+  (time-format/unparse (time-format/formatters :basic-date) (time/now)))
 
 (defn to-mins [msec]
   (quot msec 60000))
@@ -247,8 +252,8 @@
 (defn ttname [tname]
   (let [match (re-matches #"(.+)\..*" tname)]
     (if match
-      (str (match 1) "-times.csv")
-      (str tname "-times.csv"))))
+      (str (match 1) "-times-" (today) ".csv")
+      (str tname "-times" (today) ".csv"))))
 
 (defn -main []
   (let [old-file (atom nil)
